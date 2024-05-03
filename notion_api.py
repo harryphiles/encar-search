@@ -1,6 +1,7 @@
 import asyncio
 import json
 import aiohttp
+from typing import List, Dict, Any
 
 
 def generate_payload_create_db(parent_page_id, db_title):
@@ -239,11 +240,21 @@ async def _update_notion_page(session, api_key: str, page_id: str, action: str):
     return "Action is not in actions"
 
 
-def _get_car_ids_from_db(notion_db: list[dict[any]]) -> list[str]:
-    car_ids = [
-        car.get("properties").get("Car ID").get("title")[0].get("plain_text")
+def _get_car_ids_from_db(notion_db: List[Dict[str, Any]]) -> Dict[str, bool]:
+    """extract car ids from db and return a dict of car id as key and its availability (bool) as value"""
+    converter = {
+        "✅True": True,
+        "🚫False": False,
+    }
+    car_ids = {
+        car.get("properties")
+        .get("Car ID")
+        .get("title")[0]
+        .get("plain_text"): converter.get(
+            car.get("properties").get("Availability").get("select").get("name")
+        )
         for car in notion_db
-    ]
+    }
     return car_ids
 
 
