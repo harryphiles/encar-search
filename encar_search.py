@@ -18,7 +18,7 @@ def get_query(maker: str, model: str, submodel: str, **conditions: dict) -> str:
     return default + closing
 
 
-def get_all(header: dict, query: str, target_vehicle: list) -> dict:
+def get_encar_vehicle_data(header: dict, query: str, target_vehicle: list) -> dict:
     start = 0
     increase_by = 100
     search_url = "http://api.encar.com/search/car/list/premium?count=true&q="
