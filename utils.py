@@ -1,30 +1,8 @@
 import json
+from typing import Dict, Tuple, List, Union
 
 
-def write_file(file_name, input_text, file_type="json"):
-    with open(file_name, "w", encoding="utf-8") as fp:
-        if file_type == "json":
-            json.dump(input_text, fp, indent=4, ensure_ascii=False)
-        else:
-            fp.write(input_text)
-
-
-def write_file_append(file_name, input_text, file_type="json"):
-    with open(file_name, "a", encoding="utf-8") as fp:
-        if file_type == "json":
-            json.dump(input_text, fp, indent=4, ensure_ascii=False)
-        else:
-            fp.write(input_text)
-
-
-def read_file(file_name, file_type="json"):
-    with open(file_name, "r", encoding="utf-8") as fp:
-        if file_type == "json":
-            return json.load(fp)
-        return fp.read()
-
-
-def identify_differences(db: list, encar: list) -> tuple[list]:
+def identify_differences(db: list, encar: list) -> Tuple[List[str]]:
     """returns (new, intersection, unavailable) for sorted db and api inputs"""
     db, encar = sorted(db[:]), sorted(encar[:])
     len_db, len_api = len(db), len(encar)
@@ -58,7 +36,35 @@ def identify_differences(db: list, encar: list) -> tuple[list]:
 
     return new, intersection, unavailable
 
-def find_unavailable_ids(targets: list[str], reference: dict[str, bool]) -> list[str]:
+
+def find_unavailable_ids(targets: List[str], reference: Dict[str, bool]) -> List[str]:
     """returns a list of car ids from targets which are marked unavailable in db"""
     result = [t for t in targets if not reference.get(t)]
     return result
+
+
+def write_file(
+    file_name: str, input_text: Union[str, dict, list], file_type: str = "json"
+) -> None:
+    with open(file_name, "w", encoding="utf-8") as fp:
+        if file_type == "json":
+            json.dump(input_text, fp, indent=4, ensure_ascii=False)
+        else:
+            fp.write(input_text)
+
+
+def write_file_append(
+    file_name: str, input_text: Union[str, dict, list], file_type: str = "json"
+) -> None:
+    with open(file_name, "a", encoding="utf-8") as fp:
+        if file_type == "json":
+            json.dump(input_text, fp, indent=4, ensure_ascii=False)
+        else:
+            fp.write(input_text)
+
+
+def read_file(file_name: str, file_type: str = "json") -> None:
+    with open(file_name, "r", encoding="utf-8") as fp:
+        if file_type == "json":
+            return json.load(fp)
+        return fp.read()
