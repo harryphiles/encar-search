@@ -57,3 +57,8 @@ def identify_differences(db: list, encar: list) -> tuple[list]:
         pointer_api += 1
 
     return new, intersection, unavailable
+
+def find_unavailable_ids(targets: list[str], reference: dict[str, bool]) -> list[str]:
+    """returns a list of car ids from targets which are marked unavailable in db"""
+    result = [t for t in targets if not reference.get(t)]
+    return result
