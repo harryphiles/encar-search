@@ -310,12 +310,13 @@ async def create_notion_pages(
         return result
 
 
-async def update_pages(
-    api_key: str, db_id: str, target_ids: list, action: str
-) -> list[str]:
+async def update_pages_with_page_ids(
+    api_key: str, page_ids: list, target_property: list
+) -> List[str]:
     async with aiohttp.ClientSession() as session:
-        db = await _query_notion_db(session=session, api_key=api_key, db_id=db_id)
-        page_ids = _get_page_ids_from_car_ids(notion_db=db, car_ids=target_ids)
-        tasks = [_update_notion_page(session, api_key, id, action) for id in page_ids]
+        tasks = [
+            _update_notion_page(session, api_key, id, target_property)
+            for id in page_ids
+        ]
         results = await asyncio.gather(*tasks)
         return results
