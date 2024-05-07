@@ -268,7 +268,7 @@ def get_car_ids_from_db(notion_db: List[Dict[str, Any]]) -> Dict[str, bool]:
 
 
 def get_page_ids_from_car_ids(
-    notion_db: List[Dict[Any]], car_ids: List[str]
+    notion_db: List[Dict[str, Any]], car_ids: List[str]
 ) -> List[str]:
     page_ids = []
     for car in notion_db:
