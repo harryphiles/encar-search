@@ -222,24 +222,27 @@ async def _query_notion_db(session, api_key: str, db_id: str, filters: list = No
     return memo
 
 
-async def _update_notion_page(session, api_key: str, page_id: str, action: str):
+async def _update_notion_page(
+    session, api_key: str, page_id: str, target_property: list
+):
     url = f"https://api.notion.com/v1/pages/{page_id}"
     header = {
         "authorization": api_key,
         "accept": "application/json",
         "Notion-Version": "2022-06-28",
     }
-    actions = {
-        "Availability": {"select": {"name": "🚫False"}},
-        "Insurance & Inspection Check": {"select": {"name": "✅True"}},
+    property, property_value = target_property
+    payload_format = {
+        "Availability": {"select": {"name": property_value}},
+        "Insurance & Inspection Check": {"select": {"name": property_value}},
     }
-    if action in actions:
-        payload = {"properties": {action: actions.get(action)}}
+    if property in payload_format:
+        payload = {"properties": {property: payload_format.get(property)}}
         async with session.patch(url, headers=header, json=payload) as r:
             if r.status == 200:
                 return r.status
             return await r.text()
-    return "Action is not in actions"
+    return "Specified property is not allowed."
 
 
 def _get_car_ids_from_db(notion_db: List[Dict[str, Any]]) -> Dict[str, bool]:
