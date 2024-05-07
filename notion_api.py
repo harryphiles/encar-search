@@ -267,12 +267,15 @@ def get_car_ids_from_db(notion_db: List[Dict[str, Any]]) -> Dict[str, bool]:
     return car_ids
 
 
-def _get_page_ids_from_car_ids(
-    notion_db: list[dict[any]], car_ids: list[str]
-) -> list[str]:
+def get_page_ids_from_car_ids(
+    notion_db: List[Dict[Any]], car_ids: List[str]
+) -> List[str]:
     page_ids = []
     for car in notion_db:
-        car_id = car.get("properties").get("Car ID").get("title")[0].get("plain_text")
+        car_id_title = car.get("properties", {}).get("Car ID", {}).get("title", [])
+        if not car_id_title:
+            continue
+        car_id = car_id_title[0].get("plain_text")
         if car_id in car_ids:
             page_ids.append(car.get("id"))
     return page_ids
