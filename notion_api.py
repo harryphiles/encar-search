@@ -310,17 +310,6 @@ async def create_notion_pages(
         return result
 
 
-async def get_car_ids_notion_db(
-    api_key: str, db_id: str, filters: list = None
-) -> list[str]:
-    async with aiohttp.ClientSession() as session:
-        db = await _query_notion_db(
-            session=session, api_key=api_key, db_id=db_id, filters=filters
-        )
-        car_ids = _get_car_ids_from_db(db)
-        return car_ids
-
-
 async def update_pages(
     api_key: str, db_id: str, target_ids: list, action: str
 ) -> list[str]:
