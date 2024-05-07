@@ -29,8 +29,9 @@ def generate_payload_create_db(parent_page_id, db_title):
                 "select": {
                     "options": [
                         {"name": "⛽Gasoline", "color": "red"},
-                        {"name": "🛢️Diesel", "color": "blue"},
+                        {"name": "🛢️Diesel", "color": "gray"},
                         {"name": "⚡Electric", "color": "green"},
+                        {"name": "⚡Hybrid⛽", "color": "blue"},
                     ]
                 }
             },
@@ -70,6 +71,7 @@ def generate_payload_create_page(
         "가솔린": "⛽Gasoline",
         "디젤": "🛢️Diesel",
         "전기": "⚡Electric",
+        "가솔린+전기": "⚡Hybrid⛽",
     }
     int_converter = {
         1: "✅True",
