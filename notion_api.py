@@ -245,7 +245,7 @@ async def _update_notion_page(
     return "Specified property is not allowed."
 
 
-def _get_car_ids_from_db(notion_db: List[Dict[str, Any]]) -> Dict[str, bool]:
+def get_car_ids_from_db(notion_db: List[Dict[str, Any]]) -> Dict[str, bool]:
     """extract car ids from db and return a dict of car id as key and its availability (bool) as value"""
     converter = {
         "✅True": True,
@@ -256,9 +256,13 @@ def _get_car_ids_from_db(notion_db: List[Dict[str, Any]]) -> Dict[str, bool]:
         .get("Car ID")
         .get("title")[0]
         .get("plain_text"): converter.get(
-            car.get("properties").get("Availability").get("select").get("name")
+            car.get("properties", {})
+            .get("Availability", {})
+            .get("select", {})
+            .get("name")
         )
         for car in notion_db
+        if car.get("properties", {}).get("Car ID", {}).get("title")
     }
     return car_ids
 
