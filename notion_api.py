@@ -1,10 +1,10 @@
 import asyncio
 import json
+from typing import Any
 import aiohttp
-from typing import List, Dict, Any
 
 
-def generate_payload_create_db(parent_page_id, db_title):
+def generate_payload_create_db(parent_page_id: str, db_title: str) -> dict[str, Any]:
     data = {
         "parent": {"type": "page_id", "page_id": parent_page_id},
         "icon": {"type": "emoji", "emoji": "🚗"},
@@ -65,8 +65,8 @@ def generate_payload_create_db(parent_page_id, db_title):
 
 
 def generate_payload_create_page(
-    parent_db_id: str, car_id: str, car_data: dict[str, any]
-):
+    parent_db_id: str, car_id: str, car_data: dict[str, Any]
+) -> dict[str, Any]:
     fuel_converter = {
         "가솔린": "⛽Gasoline",
         "디젤": "🛢️Diesel",
@@ -119,7 +119,9 @@ def generate_payload_create_page(
     return data
 
 
-async def _create_notion_db(session, api_key: str, parent_page_id, db_name):
+async def _create_notion_db(
+    session, api_key: str, parent_page_id: str, db_name: str
+) -> dict[str, Any]:
     url = "https://api.notion.com/v1/databases"
     header = {
         "authorization": api_key,
@@ -137,7 +139,7 @@ async def _create_notion_db(session, api_key: str, parent_page_id, db_name):
 
 async def _create_notion_page(
     session, api_key: str, db_id: str, car_id: str, car_data: list
-):
+) -> str | int:
     url = "https://api.notion.com/v1/pages"
     header = {
         "authorization": api_key,
@@ -152,8 +154,8 @@ async def _create_notion_page(
 
 
 async def create_db_and_pages(
-    api_key: str, parent_page_id: str, db_name: str, car_data: dict[str, dict[str, any]]
-):
+    api_key: str, parent_page_id: str, db_name: str, car_data: dict[str, dict[str, Any]]
+) -> list[str | int]:
     async with aiohttp.ClientSession() as session:
         db_id = await _create_notion_db(
             session,
@@ -175,7 +177,9 @@ async def create_db_and_pages(
         return result
 
 
-async def _query_notion_db(session, api_key: str, db_id: str, filters: list = None):
+async def _query_notion_db(
+    session, api_key: str, db_id: str, filters: list = None
+) -> list[dict[str, Any]]:
     url = f"https://api.notion.com/v1/databases/{db_id}/query"
     header = {
         "authorization": api_key,
@@ -197,7 +201,12 @@ async def _query_notion_db(session, api_key: str, db_id: str, filters: list = No
         }
 
     async def __get_paginated_requests(
-        session, url, header, payload, memo, start_cursor=None
+        session,
+        url: str,
+        header: dict[str, Any],
+        payload: dict[str, Any],
+        memo: list,
+        start_cursor: str = None,
     ):
         while True:
             if start_cursor:
@@ -223,8 +232,8 @@ async def _query_notion_db(session, api_key: str, db_id: str, filters: list = No
 
 
 async def _update_notion_page(
-    session, api_key: str, page_id: str, target_property: list
-):
+    session, api_key: str, page_id: str, target_property: list[str]
+) -> str | int:
     url = f"https://api.notion.com/v1/pages/{page_id}"
     header = {
         "authorization": api_key,
@@ -245,7 +254,7 @@ async def _update_notion_page(
     return "Specified property is not allowed."
 
 
-def get_car_ids_from_db(notion_db: List[Dict[str, Any]]) -> Dict[str, bool]:
+def get_car_ids_from_db(notion_db: list[dict[str, Any]]) -> dict[str, bool]:
     """extract car ids from db and return a dict of car id as key and its availability (bool) as value"""
     converter = {
         "✅True": True,
@@ -268,8 +277,8 @@ def get_car_ids_from_db(notion_db: List[Dict[str, Any]]) -> Dict[str, bool]:
 
 
 def get_page_ids_from_car_ids(
-    notion_db: List[Dict[str, Any]], car_ids: List[str]
-) -> List[str]:
+    notion_db: list[dict[str, Any]], car_ids: list[str]
+) -> list[str]:
     page_ids = []
     for car in notion_db:
         car_id_title = car.get("properties", {}).get("Car ID", {}).get("title", [])
@@ -312,7 +321,7 @@ async def create_notion_pages(
 
 async def update_pages_with_page_ids(
     api_key: str, page_ids: list, target_property: list
-) -> List[str]:
+) -> list[str]:
     async with aiohttp.ClientSession() as session:
         tasks = [
             _update_notion_page(session, api_key, id, target_property)
@@ -324,7 +333,7 @@ async def update_pages_with_page_ids(
 
 async def get_notion_db(
     api_key: str, db_id: str, filters: list = None
-) -> Dict[str, bool]:
+) -> dict[str, bool]:
     async with aiohttp.ClientSession() as session:
         db = await _query_notion_db(
             session=session, api_key=api_key, db_id=db_id, filters=filters
