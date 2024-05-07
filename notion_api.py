@@ -320,3 +320,13 @@ async def update_pages_with_page_ids(
         ]
         results = await asyncio.gather(*tasks)
         return results
+
+
+async def get_notion_db(
+    api_key: str, db_id: str, filters: list = None
+) -> Dict[str, bool]:
+    async with aiohttp.ClientSession() as session:
+        db = await _query_notion_db(
+            session=session, api_key=api_key, db_id=db_id, filters=filters
+        )
+        return db
