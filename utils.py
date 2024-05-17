@@ -37,9 +37,9 @@ def identify_differences(db: list, encar: list) -> Tuple[List[str]]:
     return new, intersection, unavailable
 
 
-def find_unavailable_ids(targets: List[str], reference: Dict[str, bool]) -> List[str]:
-    """returns a list of car ids from targets which are marked unavailable in db"""
-    result = [t for t in targets if not reference.get(t)]
+def find_ids_by_status(targets: list[str], reference: dict[str, bool], status: bool) -> list[str]:
+    """Returns a list of car ids from targets that meet availability status in the reference."""
+    result = [t for t in targets if reference.get(t) == status]
     return result
 
 
