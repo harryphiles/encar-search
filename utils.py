@@ -1,8 +1,8 @@
 import json
-from typing import Dict, Tuple, List, Union
+from typing import Union
 
 
-def identify_differences(db: list, encar: list) -> Tuple[List[str]]:
+def identify_differences(db: list, encar: list) -> tuple[list[str]]:
     """returns (new, intersection, unavailable) for sorted db and api inputs"""
     db, encar = sorted(db[:]), sorted(encar[:])
     len_db, len_api = len(db), len(encar)
