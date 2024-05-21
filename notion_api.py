@@ -278,6 +278,7 @@ def get_car_ids_from_db(notion_db: list[dict[str, Any]]) -> dict[str, dict]:
                 .get("select", {})
                 .get("name")
             ),
+            "page_id": car.get("id"),
             "last_edited_time": car.get("last_edited_time"),
         }
         for car in notion_db
