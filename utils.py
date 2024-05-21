@@ -37,10 +37,18 @@ def identify_differences(db: list, encar: list) -> tuple[list[str]]:
     return new, intersection, unavailable
 
 
-def find_ids_by_status(targets: list[str], reference: dict[str, bool], status: bool) -> list[str]:
-    """Returns a list of car ids from targets that meet availability status in the reference."""
-    result = [t for t in targets if reference.get(t) == status]
-    return result
+def find_ids_by_status(
+    targets: list[str], reference: dict[str, dict[str, bool | str]], status: bool
+) -> tuple[list[str], list[str]]:
+    """Returns two lists of car IDs: those that meet the condition and those that do not."""
+    matched = []
+    unmatched = []
+    for t in targets:
+        if reference.get(t, {}).get("availability") == status:
+            matched.append(t)
+        else:
+            unmatched.append(t)
+    return matched, unmatched
 
 
 def write_file(
