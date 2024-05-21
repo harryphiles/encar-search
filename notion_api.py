@@ -200,14 +200,7 @@ async def _query_notion_db(
             }
         }
 
-    async def __get_paginated_requests(
-        session,
-        url: str,
-        header: dict[str, Any],
-        payload: dict[str, Any],
-        memo: list,
-        start_cursor: str = None,
-    ):
+    async def __get_paginated_requests(start_cursor: str = None):
         while True:
             if start_cursor:
                 payload["start_cursor"] = start_cursor
@@ -224,7 +217,7 @@ async def _query_notion_db(
                 start_cursor = next_cursor
         return 200, memo
 
-    status, memo = await __get_paginated_requests(session, url, header, payload, memo)
+    status, memo = await __get_paginated_requests()
 
     if status != 200:
         return status
