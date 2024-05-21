@@ -254,6 +254,20 @@ async def _update_notion_page(
     return "Specified property is not allowed."
 
 
+async def _trash_notion_page(session, api_key: str, page_id: str) -> str | int:
+    url = f"https://api.notion.com/v1/pages/{page_id}"
+    header = {
+        "authorization": api_key,
+        "accept": "application/json",
+        "Notion-Version": "2022-06-28",
+    }
+    payload = {"in_trash": True}
+    async with session.patch(url, headers=header, json=payload) as r:
+        if r.status == 200:
+            return r.status
+        return await r.text()
+
+
 def get_car_ids_from_db(notion_db: list[dict[str, Any]]) -> dict[str, bool]:
     """extract car ids from db and return a dict of car id as key and its availability (bool) as value"""
     converter = {
@@ -327,6 +341,13 @@ async def update_pages_with_page_ids(
             _update_notion_page(session, api_key, id, target_property)
             for id in page_ids
         ]
+        results = await asyncio.gather(*tasks)
+        return results
+
+
+async def trash_pages_with_page_ids(api_key: str, page_ids: list) -> list[str]:
+    async with aiohttp.ClientSession() as session:
+        tasks = [_trash_notion_page(session, api_key, id) for id in page_ids]
         results = await asyncio.gather(*tasks)
         return results
 
