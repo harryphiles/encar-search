@@ -261,7 +261,7 @@ async def _trash_notion_page(session, api_key: str, page_id: str) -> str | int:
         return await r.text()
 
 
-def get_car_ids_from_db(notion_db: list[dict[str, Any]]) -> dict[str, dict]:
+def extract_specific_data(notion_db: list[dict[str, Any]]) -> dict[str, dict]:
     """Return a dict of car IDs as keys, availability and last_edited_time as values."""
     converter = {
         "✅True": True,
@@ -284,6 +284,10 @@ def get_car_ids_from_db(notion_db: list[dict[str, Any]]) -> dict[str, dict]:
         for car in notion_db
         if car.get("properties", {}).get("Car ID", {}).get("title")
     }
+
+
+def get_page_ids_from_formatted_db(targets: list[str], formatted_db: dict[str, dict[str, bool | str]]) -> list[str]:
+    return [formatted_db.get(car_id, {}).get("page_id") for car_id in targets]
 
 
 def get_page_ids_from_car_ids(
