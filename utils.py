@@ -1,5 +1,26 @@
+from datetime import datetime, timezone, timedelta
 import json
 from typing import Union
+
+
+class Expiration:
+    def __init__(self, expiration_days: int = 14) -> None:
+        self.now = datetime.now(tz=timezone.utc)
+        self.expiration_days = expiration_days
+        self.iso_format = "%Y-%m-%dT%H:%M:%S.%f%z"
+
+    def _is_expired(self, vehicle_data: dict[str, bool | str]):
+        last_edited_time_str = vehicle_data.get("last_edited_time")
+        last_edited_time = datetime.strptime(last_edited_time_str, self.iso_format)
+        return self.now - last_edited_time > timedelta(days=self.expiration_days)
+
+    def collect_expired(
+        self, targets: list[str], vehicle_db: dict[str, dict[str, bool | str]]
+    ) -> list[str]:
+        """Returns a list of vehicle page IDs which are over user-defined expiration days"""
+        return [
+            car_id for car_id in targets if self._is_expired(vehicle_db.get(car_id))
+        ]
 
 
 def identify_differences(db: list, encar: list) -> tuple[list[str]]:
