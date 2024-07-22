@@ -1,6 +1,7 @@
 from datetime import datetime, timezone, timedelta
 import json
-from typing import Union
+from typing import Union, Iterable, Any
+from collections import defaultdict
 
 
 class Expiration:
@@ -72,6 +73,41 @@ def find_ids_by_status(
     return matched, unmatched
 
 
+def check_updates_for_intersection(
+    intersection: Iterable[str], api_data: dict[str, Any], db_data: dict[str, Any]
+) -> dict[str, dict[str, Any]]:
+    """
+    Identify necessary updates for intersection data by comparing API and DB.
+    1. Check if availability has changed.
+    2. Check price changes.
+    """
+    changes = defaultdict(dict)
+    for car_id in intersection:
+        page_id = db_data.get(car_id, {}).get("page_id")
+        db_availability = db_data.get(car_id, {}).get("availability")
+        # Car id found in the intersection indicates it's available in Encar
+        # therefore mark it available in DB
+        if not db_availability:
+            changes[page_id]["availability"] = "✅True"
+        # Get prices from api and db
+        api_price_raw = api_data.get(car_id, {}).get("Price")
+        db_price_raw = db_data.get(car_id, {}).get("price")
+        api_price = int(api_price_raw) if api_price_raw is not None else None
+        db_price = (
+            int(db_price_raw / 10_000) if db_price_raw is not None else None
+        )  # "number": 19500000
+        # If prices are not same, update price and comment
+        if api_price and db_price and api_price != db_price:
+            changes[page_id]["price"] = api_price * 10_000
+            db_comment = db_data.get(car_id, {}).get("comment")
+            changes[page_id]["comment"] = (
+                db_comment + f"→{api_price}"
+                if db_comment
+                else f"{db_price}→{api_price}"
+            )
+    return dict(changes) if changes else {}
+
+
 def write_file(
     file_name: str, input_text: Union[str, dict, list], file_type: str = "json"
 ) -> None:
@@ -97,3 +133,23 @@ def read_file(file_name: str, file_type: str = "json") -> None:
         if file_type == "json":
             return json.load(fp)
         return fp.read()
+
+
+if __name__ == "__main__":
+    test_intersection = {"1234", "4321", "2345"}
+    test_api_data = {
+        "1234": {"Price": 2900,},
+        "4321": {"Price": 3100,},
+        "2345": {"Price": 3100,},
+    }
+    test_db_data = {
+        "1234": {"price": 31_000_000, "availability": True, "comment": "3100→3000", "page_id": "1"},
+        "4321": {"price": 31_000_000, "availability": True, "comment": None, "page_id": "22"},
+        "2345": {"price": 31_000_000, "availability": False, "comment": None, "page_id": "333"},
+    }
+    test = check_updates_for_intersection(
+        intersection=test_intersection,
+        api_data=test_api_data,
+        db_data=test_db_data,
+    )
+    print(f"{test = }")
