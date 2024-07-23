@@ -78,7 +78,7 @@ class PayloadGenerator:
             return asdict(formats.get(format_type)(input_data))
         return None
         
-    def generate_properties_payload(
+    def generate(
         self, properties_data: dict[str, str | int], filter_keys: set[str] | None = None
     ) -> dict:
         def should_include(property: str) -> bool:
@@ -131,7 +131,7 @@ def main():
     }
 
     pgenerator = PayloadGenerator(VARIABLE_PROPERTY_NAMES, VARIABLE_TYPES)
-    generated = pgenerator.generate_properties_payload(input_data)
+    generated = pgenerator.generate(input_data)
     print(f"{generated = }")
 
 
