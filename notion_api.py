@@ -2,6 +2,7 @@ import asyncio
 import json
 from typing import Any
 import aiohttp
+from payload_generator import PayloadGenerator, VARIABLE_PROPERTY_NAMES, VARIABLE_TYPES
 
 
 def generate_payload_create_db(parent_page_id: str, db_title: str) -> dict[str, Any]:
@@ -225,7 +226,7 @@ async def _query_notion_db(
 
 
 async def _update_notion_page(
-    session, api_key: str, page_id: str, target_property: list[str]
+    session, api_key: str, page_id: str, update_data: dict[str, Any]
 ) -> str | int:
     url = f"https://api.notion.com/v1/pages/{page_id}"
     header = {
@@ -233,13 +234,10 @@ async def _update_notion_page(
         "accept": "application/json",
         "Notion-Version": "2022-06-28",
     }
-    property, property_value = target_property
-    payload_format = {
-        "Availability": {"select": {"name": property_value}},
-        "Insurance & Inspection Check": {"select": {"name": property_value}},
-    }
-    if property in payload_format:
-        payload = {"properties": {property: payload_format.get(property)}}
+    pgenerator = PayloadGenerator(VARIABLE_PROPERTY_NAMES, VARIABLE_TYPES)
+    updates = pgenerator.generate_properties_payload(update_data)
+    if updates:
+        payload = {"properties": updates}
         async with session.patch(url, headers=header, json=payload) as r:
             if r.status == 200:
                 return r.status
