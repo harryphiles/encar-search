@@ -280,6 +280,16 @@ def extract_specific_data(notion_db: list[dict[str, Any]]) -> dict[str, dict]:
             ),
             "page_id": car.get("id"),
             "last_edited_time": car.get("last_edited_time"),
+            "price": car.get("properties", {}).get("Price", {}).get("number"),
+            "comment": (
+                car.get("properties", {})
+                .get("Comment", {})
+                .get("rich_text", [])[0]
+                .get("text", {})
+                .get("content")
+                if car.get("properties", {}).get("Comment", {}).get("rich_text", [])
+                else None
+            ),
         }
         for car in notion_db
         if car.get("properties", {}).get("Car ID", {}).get("title")
