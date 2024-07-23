@@ -342,12 +342,23 @@ async def create_notion_pages(
 
 
 async def update_pages_with_page_ids(
-    api_key: str, page_ids: list, target_property: list
+    api_key: str, page_ids: list, update_data: dict[str, Any]
 ) -> list[str]:
     async with aiohttp.ClientSession() as session:
         tasks = [
-            _update_notion_page(session, api_key, id, target_property)
-            for id in page_ids
+            _update_notion_page(session, api_key, id, update_data) for id in page_ids
+        ]
+        results = await asyncio.gather(*tasks)
+        return results
+
+
+async def update_pages_with_update_targets(
+    api_key: str, update_targets: dict[str, dict[str, Any]]
+) -> list[str]:
+    async with aiohttp.ClientSession() as session:
+        tasks = [
+            _update_notion_page(session, api_key, page_id, update_data)
+            for page_id, update_data in update_targets.items()
         ]
         results = await asyncio.gather(*tasks)
         return results
