@@ -234,15 +234,13 @@ async def _update_notion_page(
         "accept": "application/json",
         "Notion-Version": "2022-06-28",
     }
-    pgenerator = PayloadGenerator(VARIABLE_PROPERTY_NAMES, VARIABLE_TYPES)
-    updates = pgenerator.generate_properties_payload(update_data)
-    if updates:
-        payload = {"properties": updates}
+    if update_data:
+        payload = {"properties": update_data}
         async with session.patch(url, headers=header, json=payload) as r:
             if r.status == 200:
                 return r.status
             return await r.text()
-    return "Specified property is not allowed."
+    return "Data for update is not provided."
 
 
 async def _trash_notion_page(session, api_key: str, page_id: str) -> str | int:
@@ -355,9 +353,10 @@ async def update_pages_with_page_ids(
 async def update_pages_with_update_targets(
     api_key: str, update_targets: dict[str, dict[str, Any]]
 ) -> list[str]:
+    pg = PayloadGenerator(VARIABLE_PROPERTY_NAMES, VARIABLE_TYPES)
     async with aiohttp.ClientSession() as session:
         tasks = [
-            _update_notion_page(session, api_key, page_id, update_data)
+            _update_notion_page(session, api_key, page_id, pg.generate(update_data))
             for page_id, update_data in update_targets.items()
         ]
         results = await asyncio.gather(*tasks)
