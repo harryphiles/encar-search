@@ -30,6 +30,7 @@ def get_encar_vehicle_data(header: dict, query: str, target_vehicle: list) -> di
         return r.raise_for_status()
     remaining_cars = r.json().get("Count")
     checked_cars_ids = {}
+    duplicate_checks = set()
 
     while remaining_cars > start:
         sort_range = f"&sr=|PriceDesc|{start}|{increase_by}"
@@ -41,16 +42,21 @@ def get_encar_vehicle_data(header: dict, query: str, target_vehicle: list) -> di
         fetched_cars = r.json().get("SearchResults")
         for car in fetched_cars:
             car_id = car.get("Id", "")
-            car_data = {
-                car_id: {
+            mileage = car.get("Mileage", "")
+            price = car.get("Price", "")
+            mileage_price = f"{mileage}_{price}"
+            
+            if mileage_price not in duplicate_checks:
+                duplicate_checks.add(mileage_price)
+                checked_cars_ids[car_id] = {
                     "Badge": car.get("Badge", ""),
                     "BadgeDetail": car.get("BadgeDetail", ""),
                     "Transmission": car.get("Transmission", ""),
                     "FuelType": car.get("FuelType", ""),
                     "Year": car.get("Year", ""),
                     "FormYear": car.get("FormYear", ""),
-                    "Mileage": car.get("Mileage", ""),
-                    "Price": car.get("Price", ""),
+                    "Mileage": mileage,
+                    "Price": price,
                     "OfficeCityState": car.get("OfficeCityState", ""),
                     "ModifiedDate": car.get("ModifiedDate", ""),
                     "Availability": 1,
@@ -59,8 +65,6 @@ def get_encar_vehicle_data(header: dict, query: str, target_vehicle: list) -> di
                     "Model": target_vehicle[1],
                     "Submodel": target_vehicle[2],
                 }
-            }
-            checked_cars_ids.update(car_data)
         start += increase_by
 
     return checked_cars_ids
