@@ -342,9 +342,11 @@ async def create_notion_pages(
 async def update_pages_with_page_ids(
     api_key: str, page_ids: list, update_data: dict[str, Any]
 ) -> list[str]:
+    pg = PayloadGenerator(VARIABLE_PROPERTY_NAMES, VARIABLE_TYPES)
+    update_data_payload = pg.generate(update_data)
     async with aiohttp.ClientSession() as session:
         tasks = [
-            _update_notion_page(session, api_key, id, update_data) for id in page_ids
+            _update_notion_page(session, api_key, id, update_data_payload) for id in page_ids
         ]
         results = await asyncio.gather(*tasks)
         return results
